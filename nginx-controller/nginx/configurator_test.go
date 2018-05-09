@@ -64,6 +64,27 @@ func TestParseStickyServiceInvalidFormat(t *testing.T) {
 	}
 }
 
+func TestParsePort(t *testing.T) {
+	servicePort := "8000"
+
+	_, err := parsePort(servicePort)
+	if err != nil {
+		t.Errorf("parsePort(%s) should return %q, nil; got %q, %q", servicePort, servicePort, servicePort, err)
+	}
+}
+
+func TestParsePortInvalidFormat(t *testing.T) {
+	servicePort := "coffee"
+	_, formatError := parsePort(servicePort)
+
+	servicePort = "-1"
+	_, inputError := parsePort(servicePort)
+
+	if formatError == nil || inputError == nil {
+		t.Errorf("parsePort(%s) should return err, got nil", servicePort)
+	}
+}
+
 func TestFilterMasterAnnotations(t *testing.T) {
 	masterAnnotations := map[string]string{
 		"nginx.org/rewrites":                "serviceName=service1 rewrite=rewrite1",
@@ -150,5 +171,14 @@ func TestMergeMasterAnnotationsIntoMinion(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedMergedAnnotations, minionAnnotations) {
 		t.Errorf("mergeMasterAnnotationsIntoMinion returned %v, but expected %v", minionAnnotations, expectedMergedAnnotations)
+	}
+}
+
+func TestKeyToFileName(t *testing.T) {
+	input := "nginx.org/ssl-services"
+	expected := "nginx.org-ssl-services"
+	fileName := keyToFileName(input)
+	if fileName != expected {
+		t.Errorf("keyToFileName(%s) returned %v, but expected %v", input, fileName, expected)
 	}
 }
